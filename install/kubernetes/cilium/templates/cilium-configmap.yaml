@@ -481,7 +481,7 @@ data:
 {{- end }}
 
 {{- if hasKey .Values "nativeRoutingCIDR" }}
-  native-routing-cidr: {{ .Values.nativeRoutingCIDR }}
+  ipv4-native-routing-cidr: {{ .Values.nativeRoutingCIDR }}
 {{- end }}
 
 {{- if hasKey .Values "fragmentTracking" }}
