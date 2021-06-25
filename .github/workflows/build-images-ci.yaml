@@ -2,7 +2,7 @@ name: Image CI Build
 
 # Any change in triggers needs to be reflected in the concurrency group.
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - synchronize
@@ -74,7 +74,7 @@ jobs:
 
       # master branch pushes
       - name: CI Build ${{ matrix.name }}
-        if: ${{ github.event_name != 'pull_request_target' }}
+        if: ${{ github.event_name == 'push' }}
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         id: docker_build_ci_master
         with:
@@ -89,7 +89,7 @@ jobs:
             OPERATOR_VARIANT=${{ matrix.name }}
 
       - name: CI race detection Build ${{ matrix.name }}
-        if: ${{ github.event_name != 'pull_request_target' }}
+        if: ${{ github.event_name == 'push' }}
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         id: docker_build_ci_master_detect_race_condition
         with:
@@ -107,7 +107,7 @@ jobs:
             OPERATOR_VARIANT=${{ matrix.name }}
 
       - name: CI Image Releases digests
-        if: ${{ github.event_name != 'pull_request_target' }}
+        if: ${{ github.event_name == 'push' }}
         shell: bash
         run: |
           mkdir -p image-digest/
@@ -118,7 +118,7 @@ jobs:
 
       # PR updates
       - name: CI Build ${{ matrix.name }}
-        if: ${{ github.event_name == 'pull_request_target' }}
+        if: ${{ github.event_name != 'push' }}
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         id: docker_build_ci_pr
         with:
@@ -132,14 +132,14 @@ jobs:
             OPERATOR_VARIANT=${{ matrix.name }}
 
       - name: CI Image Releases digests
-        if: ${{ github.event_name == 'pull_request_target' }}
+        if: ${{ github.event_name != 'push' }}
         shell: bash
         run: |
           mkdir -p image-digest/
           echo "quay.io/${{ github.repository_owner }}/${{ matrix.name }}-ci:${{ steps.tag.outputs.tag }}@${{ steps.docker_build_ci_pr.outputs.digest }}" > image-digest/${{ matrix.name }}.txt
 
       - name: CI race detection Build ${{ matrix.name }}
-        if: ${{ github.event_name == 'pull_request_target' }}
+        if: ${{ github.event_name != 'push' }}
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         id: docker_build_ci_pr_detect_race_condition
         with:
@@ -156,7 +156,7 @@ jobs:
             OPERATOR_VARIANT=${{ matrix.name }}
 
       - name: CI Image Releases digests
-        if: ${{ github.event_name == 'pull_request_target' }}
+        if: ${{ github.event_name != 'push' }}
         shell: bash
         run: |
           mkdir -p image-digest/
